@@ -130,7 +130,7 @@ def mesh_from_surfaces(surfaces, element_type):
     return np.vstack(node_blocks), np.asarray(elements, dtype=int)
 
 
-def make_figure(surfaces, with_mesh, title):
+def make_figure(surfaces, with_mesh, title, element_type=None):
     fig = go.Figure()
     for name, (X, Y, Z) in surfaces.items():
         fig.add_trace(go.Surface(
@@ -139,14 +139,21 @@ def make_figure(surfaces, with_mesh, title):
         if with_mesh:
             lx, ly, lz = [], [], []
             nr, nc = X.shape
-            for i in range(nr):
-                lx += X[i, :].tolist()+[None]
-                ly += Y[i, :].tolist()+[None]
-                lz += Z[i, :].tolist()+[None]
-            for j in range(nc):
-                lx += X[:, j].tolist()+[None]
-                ly += Y[:, j].tolist()+[None]
-                lz += Z[:, j].tolist()+[None]
+            for i in range(nr - 1):
+                for j in range(nc - 1):
+                    corners = (
+                        (i, j), (i, j + 1), (i + 1, j + 1), (i + 1, j)
+                    )
+                    edges = ((0, 1), (1, 2), (2, 3), (3, 0))
+                    if element_type == "Triangles":
+                        edges += ((0, 2),)
+                    for start, end in edges:
+                        for values, axis in ((lx, X), (ly, Y), (lz, Z)):
+                            values.extend([
+                                float(axis[corners[start]]),
+                                float(axis[corners[end]]),
+                                None,
+                            ])
             fig.add_trace(go.Scatter3d(
                 x=lx, y=ly, z=lz, mode="lines",
                 line=dict(color="#1565C0" if name == "Extrados" else "#6A1B9A", width=2),
@@ -703,7 +710,9 @@ with tab_geo:
     with col1:
         st.plotly_chart(make_figure(surfaces, False, "Aile initiale"), **STRETCH)
     with col2:
-        st.plotly_chart(make_figure(surfaces, True, "Aile maillée"), **STRETCH)
+        st.plotly_chart(
+            make_figure(surfaces, True, f"Aile maillée — {element_type}", element_type),
+            **STRETCH)
 
     k1, k2, k3 = st.columns(3)
     k1.metric("Nœuds", f"{len(nodes):,}".replace(",", " "))
@@ -726,7 +735,14 @@ with tab_geo:
         st.dataframe(node_df.head(20), **STRETCH)
     with st.expander("Aperçu des éléments"):
         st.dataframe(elem_df.head(20), **STRETCH)
-    st.info("Maillage surfacique structuré de l'extrados et de l'intrados (pas de maillage volumique).")
+    if element_type == "Triangles":
+        st.info(
+            "Maillage triangulaire : chaque cellule est divisée par une diagonale "
+            "visible en bleu/violet. Les éléments exportés ont 3 nœuds.")
+    else:
+        st.info(
+            "Maillage quadrilatère : chaque cellule conserve ses 4 côtés, sans "
+            "diagonale. Les éléments exportés ont 4 nœuds.")
 
 # ------------------------------------------------- Calcul VLM (une seule fois)
 vlm, vlm_error = None, None
