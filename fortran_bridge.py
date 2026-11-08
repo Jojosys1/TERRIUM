@@ -1,4 +1,4 @@
-"""Pilotage du solveur Fortran MPI de Prandtl depuis Streamlit.
+"""Pilotage du solveur Fortran MPI de Prandtl depuis Streamlit. 
 
 Le solveur scientifique reste entièrement implémenté en Fortran. Ce module
 ne fait que compiler, lancer et parser ses interfaces texte existantes.
