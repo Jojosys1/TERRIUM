@@ -8,6 +8,7 @@ Repère lié à l'aile : x vers le bord de fuite, y en envergure, z vers le haut
 L'aile avance vers -x ; l'écoulement relatif U_inf est donc dirigé vers +x.
 """
 import inspect
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -21,7 +22,11 @@ from fortran_bridge import (
     tool_status,
 )
 
-st.set_page_config(page_title="Terrium — aile de drone", layout="wide")
+st.set_page_config(
+    page_title="Terrium — aile de drone",
+    page_icon=str(Path(__file__).parent / "assets" / "favicon.png"),
+    layout="wide",
+)
 st.markdown("""
 <div style="text-align:center; margin:0 0 1.2rem 0;">
   <svg width="76" height="76" viewBox="0 0 100 100" role="img"
