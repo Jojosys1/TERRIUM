@@ -1,4 +1,4 @@
-# Terrium — simulation aérodynamique d'une aile de drone
+# Terrium — simulation aérodynamique d'une aile de drone, d'un avion ou d'un aile d'un pallier éolien
 
 Application Streamlit de visualisation d'une aile de drone, avec :
 
